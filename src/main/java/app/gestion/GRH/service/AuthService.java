@@ -1,0 +1,43 @@
+package app.gestion.GRH.service;
+
+import app.gestion.GRH.dto.LoginResponse;
+import app.gestion.GRH.model.Individu;
+import app.gestion.GRH.model.JwtUtil;
+import app.gestion.GRH.model.Utilisateur;
+import app.gestion.GRH.repository.IndividuRepository;
+import app.gestion.GRH.repository.UtilisateurRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final IndividuRepository individuRepository;
+    private final UtilisateurRepository utilisateurRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
+    public LoginResponse login(Map<String, String> loginData) {
+        String email = loginData.get("email");
+        String password = loginData.get("password");
+
+        Individu individu = individuRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email invalide"));
+
+        if (!passwordEncoder.matches(password, individu.getPassword())) {
+            throw new RuntimeException("Mot de passe incorrect");
+        }
+
+        Utilisateur utilisateur = utilisateurRepository.findAll().stream()
+                .filter(u -> u.getIdIndividu().equals(individu.getId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        String token = jwtUtil.generateToken(email);
+
+        return new LoginResponse(token, individu.getNom(), individu.getPrenom(), individu.getAdresse(), individu.getEmail(), individu.getTelephone(), utilisateur.getRoles(), utilisateur.getIdSociete(), utilisateur.getEtat());
+    }
+}
