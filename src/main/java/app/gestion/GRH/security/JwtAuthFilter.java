@@ -21,6 +21,7 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final IndividuRepository individuRepository;
+    private final TokenBlacklist tokenBlacklist;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -36,6 +37,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String token = authHeader.substring(7);
+
+        // 🚫 Vérification si le token est blacklisté
+        if (tokenBlacklist.isBlacklisted(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token expiré ou invalide");
+            return;
+        }
+
         final String individuEmail = jwtUtil.extractUsername(token);
 
         if (individuEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {

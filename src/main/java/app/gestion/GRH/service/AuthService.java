@@ -6,6 +6,7 @@ import app.gestion.GRH.model.JwtUtil;
 import app.gestion.GRH.model.Utilisateur;
 import app.gestion.GRH.repository.IndividuRepository;
 import app.gestion.GRH.repository.UtilisateurRepository;
+import app.gestion.GRH.security.TokenBlacklist;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class AuthService {
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklist tokenBlacklist;
 
     public LoginResponse login(Map<String, String> loginData) {
         String email = loginData.get("email");
@@ -39,5 +41,10 @@ public class AuthService {
         String token = jwtUtil.generateToken(email);
 
         return new LoginResponse(token, individu.getNom(), individu.getPrenom(), individu.getAdresse(), individu.getEmail(), individu.getTelephone(), utilisateur.getRoles(), utilisateur.getIdSociete(), utilisateur.getEtat());
+    }
+
+    public String logout(String token) {
+        tokenBlacklist.add(token);
+        return "Déconnexion réussie";
     }
 }
