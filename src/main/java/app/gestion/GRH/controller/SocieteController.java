@@ -3,6 +3,7 @@ package app.gestion.GRH.controller;
 import app.gestion.GRH.model.Societe;
 import app.gestion.GRH.service.SocieteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +42,12 @@ public class SocieteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        societeService.delete(id);
-        return ResponseEntity.notFound().build();
+        try {
+            societeService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (EmptyResultDataAccessException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
+
 }
