@@ -14,4 +14,14 @@ public class Societe {
     @Id
     private String id;
     private String nom_societe;
+    private String logo;
+    private String siege;
+    private String telephone;
+    private String numero_fax;
+    private String numero_cnaps;
+    private String numero_banque;
+    private String nom_banque;
+    private String adresse_banque;
+    private int cp_banque;
+    private String ville_banque;
 }
