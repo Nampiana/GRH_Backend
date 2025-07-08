@@ -16,6 +16,7 @@ public class Societe {
     private String nom_societe;
     private String logo;
     private String siege;
+    private String adresse;
     private String telephone;
     private String numero_fax;
     private String numero_cnaps;

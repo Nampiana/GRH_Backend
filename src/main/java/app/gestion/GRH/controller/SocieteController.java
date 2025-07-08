@@ -4,10 +4,26 @@ import app.gestion.GRH.model.Societe;
 import app.gestion.GRH.service.SocieteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -47,6 +63,41 @@ public class SocieteController {
             return ResponseEntity.noContent().build();
         } catch (EmptyResultDataAccessException ex) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/upload-logo")
+    public ResponseEntity<String> uploadLogo(@RequestParam("file") MultipartFile file) {
+        try {
+            String uploadDir = "uploads/societe-logos/";
+            Files.createDirectories(Paths.get(uploadDir));
+
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir + fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return ResponseEntity.ok(fileName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur upload");
+        }
+    }
+
+    @GetMapping("/logo/{filename:.+}")
+    public ResponseEntity<Resource> getLogo(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get("uploads/societe-logos/").resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

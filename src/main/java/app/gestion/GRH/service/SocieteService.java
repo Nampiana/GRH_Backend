@@ -30,9 +30,21 @@ public class SocieteService {
     }
 
     public Optional<Societe> update(String id, Societe newSociete){
-        return societeRepository.findById(id).map( s -> {
+        return societeRepository.findById(id).map(s -> {
             s.setNom_societe(newSociete.getNom_societe());
+            s.setLogo(newSociete.getLogo());
+            s.setSiege(newSociete.getSiege());
+            s.setAdresse(newSociete.getAdresse());
+            s.setTelephone(newSociete.getTelephone());
+            s.setNumero_fax(newSociete.getNumero_fax());
+            s.setNumero_cnaps(newSociete.getNumero_cnaps());
+            s.setNumero_banque(newSociete.getNumero_banque());
+            s.setNom_banque(newSociete.getNom_banque());
+            s.setAdresse_banque(newSociete.getAdresse_banque());
+            s.setCp_banque(newSociete.getCp_banque());
+            s.setVille_banque(newSociete.getVille_banque());
             return societeRepository.save(s);
         });
     }
+
 }
