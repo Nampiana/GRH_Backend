@@ -3,6 +3,9 @@ package app.gestion.GRH.service;
 import app.gestion.GRH.model.Societe;
 import app.gestion.GRH.repository.SocieteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +34,7 @@ public class SocieteService {
 
     public Optional<Societe> update(String id, Societe newSociete){
         return societeRepository.findById(id).map(s -> {
-            s.setNom_societe(newSociete.getNom_societe());
+            s.setNomSociete(newSociete.getNomSociete());
             s.setLogo(newSociete.getLogo());
             s.setSiege(newSociete.getSiege());
             s.setAdresse(newSociete.getAdresse());
@@ -45,6 +48,15 @@ public class SocieteService {
             s.setVille_banque(newSociete.getVille_banque());
             return societeRepository.save(s);
         });
+    }
+
+    public Page<Societe> getAllPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return societeRepository.findAll(pageable);
+    }
+
+    public Page<Societe> searchSociete(String keyword, Pageable pageable) {
+        return societeRepository.findByNomSocieteContainingIgnoreCase(keyword, pageable);
     }
 
 }

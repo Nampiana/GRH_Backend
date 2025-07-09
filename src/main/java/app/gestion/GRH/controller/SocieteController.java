@@ -4,6 +4,9 @@ import app.gestion.GRH.model.Societe;
 import app.gestion.GRH.service.SocieteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +36,11 @@ public class SocieteController {
     private final SocieteService societeService;
 
     @GetMapping
-    public List<Societe> all() {
-        return societeService.getAll();
+    public Page<Societe> getAllPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ) {
+        return societeService.getAllPaginated(page, size);
     }
 
     @PostMapping
@@ -99,6 +105,17 @@ public class SocieteController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<Societe>> searchSociete(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Societe> result = societeService.searchSociete(keyword, pageable);
+        return ResponseEntity.ok(result);
     }
 
 }

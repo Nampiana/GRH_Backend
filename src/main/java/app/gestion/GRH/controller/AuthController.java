@@ -35,4 +35,23 @@ public class AuthController {
             return ResponseEntity.status(400).body(Map.of("error", "Erreur lors de la déconnexion"));
         }
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> checkToken(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Map<String, Object> userData = authService.checkToken(token);
+
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "data", Map.of("user", userData)
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "status", "fail",
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
 }
