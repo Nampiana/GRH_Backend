@@ -6,12 +6,19 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "departement")
+import java.util.Date;
+
+@Document(collection = "employerSociete")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Departement {
+public class EmployerSociete {
     @Id
     private String id;
-    private String nomDepartement;
+    private String idUtilisateur;
+    private String idSociete;
+    private String idPoste;
+    private String idCategorie;
+    private Date dateEmbauche;
+    private Date dateDebauche;
 }
