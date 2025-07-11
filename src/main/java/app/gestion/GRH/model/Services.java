@@ -13,4 +13,5 @@ public class Services {
     private String id;
     private String nomService;
     private String idDepartement;
+    private String idSociete;
 }

@@ -12,5 +12,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Poste {
     private String id;
     private String nomPoste;
-    private String idService;
+    private String idSociete;
 }

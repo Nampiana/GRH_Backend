@@ -33,6 +33,7 @@ public class DepartementService {
     public Optional<Departement> update(String id, Departement newDepartement){
         return departementRepository.findById(id).map(d -> {
             d.setNomDepartement(newDepartement.getNomDepartement());
+            d.setIdSociete(newDepartement.getIdSociete());
             return departementRepository.save(d);
         });
     }

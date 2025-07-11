@@ -15,8 +15,9 @@ import java.util.Date;
 public class EmployerSociete {
     @Id
     private String id;
-    private String idUtilisateur;
+    private String idIndividue;
     private String idSociete;
+    private String idService;
     private String idPoste;
     private String idCategorie;
     private Date dateEmbauche;

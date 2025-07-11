@@ -14,4 +14,5 @@ public class Departement {
     @Id
     private String id;
     private String nomDepartement;
+    private String idSociete;
 }

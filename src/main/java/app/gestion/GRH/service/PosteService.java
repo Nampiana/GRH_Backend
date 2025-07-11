@@ -33,7 +33,7 @@ public class PosteService {
     public Optional<Poste> update(String id, Poste newPoste){
         return posteRepository.findById(id).map(p -> {
             p.setNomPoste(newPoste.getNomPoste());
-            p.setIdService(newPoste.getIdService());
+            p.setIdSociete(newPoste.getIdSociete());
             return posteRepository.save(p);
         });
     }

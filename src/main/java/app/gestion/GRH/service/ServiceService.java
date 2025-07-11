@@ -34,6 +34,7 @@ public class ServiceService {
         return serviceRepository.findById(id).map(s -> {
             s.setNomService(newServices.getNomService());
             s.setIdDepartement(newServices.getIdDepartement());
+            s.setIdSociete(newServices.getIdSociete());
             return serviceRepository.save(s);
         });
     }
