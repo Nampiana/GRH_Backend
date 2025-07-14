@@ -3,6 +3,7 @@ package app.gestion.GRH.controller;
 import app.gestion.GRH.dto.EmployerSocieteRequestDTO;
 import app.gestion.GRH.model.EmployerSociete;
 import app.gestion.GRH.model.Individu;
+import app.gestion.GRH.model.Utilisateur;
 import app.gestion.GRH.service.EmployerSocieteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -52,16 +53,46 @@ public class EmployerSocieteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+   /* @PutMapping("/{id}")
     public ResponseEntity<EmployerSociete> update(@PathVariable String id, @RequestBody EmployerSociete updated) {
         return employerSocieteService.update(id, updated)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }*/
+
+    @PutMapping("/update-complete/{id}")
+    public ResponseEntity<EmployerSociete> updateComplete(
+            @PathVariable String id,
+            @RequestBody EmployerSocieteRequestDTO request
+    ) {
+        Individu individu = Individu.builder()
+                .nom(request.getNom())
+                .prenom(request.getPrenom())
+                .adresse(request.getAdresse())
+                .email(request.getEmail())
+                .telephone(request.getTelephone())
+                .password(request.getPassword()) // vérifier en front qu'il est rempli si modif
+                .build();
+
+        return employerSocieteService.updateComplete(
+                        id,
+                        request.getEmployerSociete(),
+                        individu
+                ).map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
+
+   /* @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         employerSocieteService.delete(id);
         return ResponseEntity.noContent().build();
+    }*/
+
+    @DeleteMapping("/delete-complete/{id}")
+    public ResponseEntity<Void> deleteComplete(@PathVariable String id) {
+        employerSocieteService.deleteComplete(id);
+        return ResponseEntity.noContent().build();
     }
+
 }

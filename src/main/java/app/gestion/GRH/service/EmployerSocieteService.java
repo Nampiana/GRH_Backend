@@ -7,6 +7,7 @@ import app.gestion.GRH.repository.EmployerSocieteRepository;
 import app.gestion.GRH.repository.IndividuRepository;
 import app.gestion.GRH.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -19,6 +20,7 @@ public class EmployerSocieteService {
     private final EmployerSocieteRepository employerSocieteRepository;
     private final IndividuRepository individuRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public EmployerSociete createEmployerSociete(EmployerSociete employerSociete, Individu individuData, String idSociete, Integer role) {
         // Créer Individu
@@ -27,7 +29,7 @@ public class EmployerSocieteService {
                 .prenom(individuData.getPrenom())
                 .adresse(individuData.getAdresse())
                 .email(individuData.getEmail())
-                .password(individuData.getPassword())
+                .password(passwordEncoder.encode(individuData.getPassword()))
                 .telephone(individuData.getTelephone())
                 .build();
 
@@ -58,7 +60,7 @@ public class EmployerSocieteService {
         return employerSocieteRepository.findById(id);
     }
 
-    public Optional<EmployerSociete> update(String id, EmployerSociete updated) {
+  /*  public Optional<EmployerSociete> update(String id, EmployerSociete updated) {
         return employerSocieteRepository.findById(id).map(e -> {
             e.setIdSociete(updated.getIdSociete());
             e.setIdService(updated.getIdService());
@@ -67,9 +69,55 @@ public class EmployerSocieteService {
             e.setDateDebauche(updated.getDateDebauche());
             return employerSocieteRepository.save(e);
         });
+    }*/
+
+    public Optional<EmployerSociete> updateComplete(
+            String id,
+            EmployerSociete updatedEmployerSociete,
+            Individu updatedIndividu
+    ) {
+        return employerSocieteRepository.findById(id).map(employer -> {
+            // MAJ EmployerSociete
+            employer.setIdSociete(updatedEmployerSociete.getIdSociete());
+            employer.setIdService(updatedEmployerSociete.getIdService());
+            employer.setIdPoste(updatedEmployerSociete.getIdPoste());
+            employer.setIdCategorie(updatedEmployerSociete.getIdCategorie());
+            employer.setDateDebauche(updatedEmployerSociete.getDateDebauche());
+            employerSocieteRepository.save(employer);
+
+            // MAJ Individu
+            individuRepository.findById(employer.getIdIndividue()).ifPresent(ind -> {
+                ind.setNom(updatedIndividu.getNom());
+                ind.setPrenom(updatedIndividu.getPrenom());
+                ind.setAdresse(updatedIndividu.getAdresse());
+                ind.setEmail(updatedIndividu.getEmail());
+                ind.setTelephone(updatedIndividu.getTelephone());
+                if (updatedIndividu.getPassword() != null && !updatedIndividu.getPassword().isEmpty()) {
+                    ind.setPassword(passwordEncoder.encode(updatedIndividu.getPassword()));
+                }
+                individuRepository.save(ind);
+            });
+
+            return employer;
+        });
     }
 
-    public void delete(String id) {
+
+   /* public void delete(String id) {
         employerSocieteRepository.deleteById(id);
+    }*/
+
+    public void deleteComplete(String id) {
+        employerSocieteRepository.findById(id).ifPresent(employer -> {
+            String idIndividu = employer.getIdIndividue();
+
+            // Suppression de l'individu
+            individuRepository.findById(idIndividu)
+                    .ifPresent(individuRepository::delete);
+
+            // Suppression de l'employer societe
+            employerSocieteRepository.deleteById(id);
+        });
     }
+
 }
