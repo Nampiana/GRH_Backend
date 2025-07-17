@@ -16,6 +16,7 @@ public class EmployerSociete {
     @Id
     private String id;
     private String idIndividue;
+    private String idUtilisateur;
     private String idSociete;
     private String idService;
     private String idPoste;

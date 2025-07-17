@@ -47,6 +47,7 @@ public class EmployerSocieteService {
 
         // Compléter EmployerSociete
         employerSociete.setIdIndividue(individu.getId());
+        employerSociete.setIdUtilisateur(utilisateur.getId());
         employerSociete.setDateEmbauche(new Date());
 
         return employerSocieteRepository.save(employerSociete);
