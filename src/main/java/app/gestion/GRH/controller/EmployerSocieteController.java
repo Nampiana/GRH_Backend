@@ -95,4 +95,11 @@ public class EmployerSocieteController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/by-utilisateur/{idUtilisateur}")
+    public ResponseEntity<EmployerSociete> getByIdUtilisateur(@PathVariable String idUtilisateur) {
+        return employerSocieteService.getByIdUtilisateur(idUtilisateur)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

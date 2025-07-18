@@ -41,7 +41,7 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(email);
 
-        return new LoginResponse(token, individu.getNom(), individu.getPrenom(), individu.getAdresse(), individu.getEmail(), individu.getTelephone(), utilisateur.getRoles(), utilisateur.getIdSociete(), utilisateur.getEtat());
+        return new LoginResponse(token, individu.getNom(), individu.getPrenom(), individu.getAdresse(), individu.getEmail(), individu.getTelephone(), utilisateur.getRoles(), utilisateur.getIdSociete(), utilisateur.getEtat(), utilisateur.getId());
     }
 
     public String logout(String token) {

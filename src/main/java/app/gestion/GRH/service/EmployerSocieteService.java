@@ -121,4 +121,8 @@ public class EmployerSocieteService {
         });
     }
 
+    public Optional<EmployerSociete> getByIdUtilisateur(String idUtilisateur) {
+        return employerSocieteRepository.findByIdUtilisateur(idUtilisateur);
+    }
+
 }

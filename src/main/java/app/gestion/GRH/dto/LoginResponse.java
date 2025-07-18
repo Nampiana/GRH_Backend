@@ -15,4 +15,5 @@ public class LoginResponse {
     private Integer roles;
     private String idSociete;
     private Integer etat;
+    private String idUtilisateur;
 }
