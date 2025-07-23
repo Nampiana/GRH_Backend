@@ -6,22 +6,13 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-
-@Document(collection = "conge")
+@Document(collection = "soldeConge")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Conge {
+public class SoldeConge {
     @Id
     private String id;
     private String idEmployerSociete;
-    private Date dateDebut;
-    private Date dateFin;
-    private String motif;
-    private Double duree;
-    // 1 = en attente
-    // 2 = Valider
-    //3 = non valider
-    private Integer statut;
+    private Double solde;
 }

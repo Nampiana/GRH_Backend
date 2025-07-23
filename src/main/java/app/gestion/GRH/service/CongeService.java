@@ -37,6 +37,7 @@ public class CongeService {
             c.setDateFin(newConge.getDateFin());
             c.setMotif(newConge.getMotif());
             c.setStatut(newConge.getStatut());
+            c.setDuree(newConge.getDuree());
             return congeRepository.save(c);
         });
     }
