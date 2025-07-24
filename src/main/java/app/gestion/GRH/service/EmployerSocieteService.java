@@ -21,8 +21,10 @@ public class EmployerSocieteService {
     private final IndividuRepository individuRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final SocieteService societeService;
 
-    public EmployerSociete createEmployerSociete(EmployerSociete employerSociete, Individu individuData, String idSociete, Integer role) {
+  /*  public EmployerSociete createEmployerSociete(EmployerSociete employerSociete, Individu individuData, String idSociete, Integer role) {
         // Créer Individu
         Individu individu = Individu.builder()
                 .nom(individuData.getNom())
@@ -51,7 +53,50 @@ public class EmployerSocieteService {
         employerSociete.setDateEmbauche(new Date());
 
         return employerSocieteRepository.save(employerSociete);
+    }*/
+
+    public EmployerSociete createEmployerSociete(EmployerSociete employerSociete, Individu individuData, String idSociete, Integer role) {
+        // Créer Individu
+        Individu individu = Individu.builder()
+                .nom(individuData.getNom())
+                .prenom(individuData.getPrenom())
+                .adresse(individuData.getAdresse())
+                .email(individuData.getEmail())
+                .password(passwordEncoder.encode(individuData.getPassword()))
+                .telephone(individuData.getTelephone())
+                .build();
+
+        individu = individuRepository.save(individu);
+
+        // Créer Utilisateur
+        Utilisateur utilisateur = Utilisateur.builder()
+                .idIndividu(individu.getId())
+                .idSociete(idSociete)
+                .etat(1)
+                .roles(role)
+                .build();
+
+        utilisateur = utilisateurRepository.save(utilisateur);
+
+        // Compléter EmployerSociete
+        employerSociete.setIdIndividue(individu.getId());
+        employerSociete.setIdUtilisateur(utilisateur.getId());
+        employerSociete.setDateEmbauche(new Date());
+        EmployerSociete saved = employerSocieteRepository.save(employerSociete);
+
+        // Envoi d'email
+        emailService.sendCredentials(
+                individu.getEmail(),
+                individu.getNom(),
+                individu.getPrenom(),
+                individu.getEmail(),
+                individuData.getPassword(), // Attention ici, on envoie le mot de passe en clair
+                societeService.findById(employerSociete.getIdSociete()).get().getNomSociete()
+        );
+
+        return saved;
     }
+
 
     public List<EmployerSociete> getAll() {
         return employerSocieteRepository.findAll();
