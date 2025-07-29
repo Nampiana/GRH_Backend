@@ -20,6 +20,11 @@ public class Conge {
     private Date dateFin;
     private String motif;
     private Double duree;
+    private String commentaire;
+    private Date dateCreation;
+    private String filename;
+
+
     // 1 = en attente
     // 2 = Valider
     //3 = non valider

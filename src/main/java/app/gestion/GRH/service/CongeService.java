@@ -38,6 +38,8 @@ public class CongeService {
             c.setMotif(newConge.getMotif());
             c.setStatut(newConge.getStatut());
             c.setDuree(newConge.getDuree());
+            c.setCommentaire(newConge.getCommentaire());
+            c.setDateCreation(newConge.getDateCreation());
             return congeRepository.save(c);
         });
     }
