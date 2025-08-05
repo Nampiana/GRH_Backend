@@ -33,10 +33,14 @@ public class PointageService {
 
     public Optional<Pointage> update(String id, Pointage newPointage){
         return pointageRepository.findById(id).map(p -> {
-            p.setDateArriver(newPointage.getDateArriver());
-            p.setDateArriver(newPointage.getDateArriver());
-            p.setIdEmployerSociete(newPointage.getIdEmployerSociete());
+            if (newPointage.getDateArriver() != null)
+                p.setDateArriver(newPointage.getDateArriver());
+            if (newPointage.getDateDepart() != null)
+                p.setDateDepart(newPointage.getDateDepart());
+            if (newPointage.getIdEmployerSociete() != null)
+                p.setIdEmployerSociete(newPointage.getIdEmployerSociete());
             return pointageRepository.save(p);
         });
     }
+
 }
