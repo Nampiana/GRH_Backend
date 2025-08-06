@@ -39,6 +39,7 @@ public class IndividuService {
             i.setEmail(newIndividu.getEmail());
             i.setPassword(newIndividu.getPassword());
             i.setTelephone(newIndividu.getTelephone());
+            i.setDateNaissance(newIndividu.getDateNaissance());
             return individuRepository.save(i);
         });
     }
