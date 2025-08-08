@@ -4,12 +4,14 @@ import app.gestion.GRH.dto.EmployerSocieteRequestDTO;
 import app.gestion.GRH.model.EmployerSociete;
 import app.gestion.GRH.model.Individu;
 import app.gestion.GRH.model.Utilisateur;
+import app.gestion.GRH.repository.EmployerSocieteRepository;
 import app.gestion.GRH.service.EmployerSocieteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -17,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployerSocieteController {
     private final EmployerSocieteService employerSocieteService;
+    private final EmployerSocieteRepository employerSocieteRepository;
 
     @PostMapping
     public ResponseEntity<EmployerSociete> create(
@@ -101,5 +104,12 @@ public class EmployerSocieteController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/by-individu/{idIndividu}")
+    public ResponseEntity<EmployerSociete> getByIdIndividu(@PathVariable String idIndividu) {
+        Optional<EmployerSociete> emp = employerSocieteRepository.findByIdIndividue(idIndividu);
+        return emp.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
 
 }

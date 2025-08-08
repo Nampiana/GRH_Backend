@@ -12,13 +12,14 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class contrat {
+public class Contrat {
     @Id
     private String id;
     private String idEmployerSociete;
-    private String typeContrat; // CDI, CDD; STAGE
+    private String typeContrat; // CDI, CDD; STAGE; periode d'essai
     private Date dateDebut;
     private Date dateFin;
     private Double salairedebase;
+    private String fichierContrat;
     private String statu; //en cours terminer
 }
