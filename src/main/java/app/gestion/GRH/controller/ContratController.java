@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,5 +61,40 @@ public class ContratController {
         Files.write(filepath, file.getBytes());
         return ResponseEntity.ok(filename);
     }
+
+    @PutMapping(value = "/update-with-file/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Contrat> updateWithFile(
+            @PathVariable String id,
+            @RequestPart("contrat") Contrat newContrat,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        return (ResponseEntity<Contrat>) contratService.findById(id).map(existing -> {
+            try {
+                if (file != null && !file.isEmpty()) {
+                    String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                    Path filepath = Paths.get("uploads/contrat", filename);
+                    Files.createDirectories(filepath.getParent());
+                    Files.write(filepath, file.getBytes());
+                    newContrat.setFichierContrat(filename);
+                } else {
+                    newContrat.setFichierContrat(existing.getFichierContrat());
+                }
+
+                if ("CDI".equalsIgnoreCase(newContrat.getTypeContrat())) {
+                    newContrat.setDateFin(null);
+                }
+
+                newContrat.setId(existing.getId());
+                Contrat updated = contratService.create(newContrat); // ou update(...)
+                return ResponseEntity.ok(updated);
+
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            }
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)); // ✅ type Contrat conservé
+    }
+
+
+
 
 }
