@@ -85,14 +85,14 @@ public class EmployerSocieteService {
         EmployerSociete saved = employerSocieteRepository.save(employerSociete);
 
         // Envoi d'email
-        emailService.sendCredentials(
+     /*   emailService.sendCredentials(
                 individu.getEmail(),
                 individu.getNom(),
                 individu.getPrenom(),
                 individu.getEmail(),
                 individuData.getPassword(), // Attention ici, on envoie le mot de passe en clair
                 societeService.findById(employerSociete.getIdSociete()).get().getNomSociete()
-        );
+        );*/
 
         return saved;
     }
@@ -129,6 +129,7 @@ public class EmployerSocieteService {
             employer.setIdPoste(updatedEmployerSociete.getIdPoste());
             employer.setIdCategorie(updatedEmployerSociete.getIdCategorie());
             employer.setDateDebauche(updatedEmployerSociete.getDateDebauche());
+            employer.setSalaireBase(updatedEmployerSociete.getSalaireBase());
             employerSocieteRepository.save(employer);
 
             // MAJ Individu

@@ -33,6 +33,7 @@ public class CategorieService {
     public Optional<Categorie> update(String id, Categorie newCategorie){
         return categorieRepository.findById(id).map(c -> {
             c.setNomCategorie(newCategorie.getNomCategorie());
+            c.setIdSociete(newCategorie.getIdSociete());
             return categorieRepository.save(c);
         });
     }

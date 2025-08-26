@@ -23,4 +23,6 @@ public class EmployerSociete {
     private String idCategorie;
     private Date dateEmbauche;
     private Date dateDebauche;
+    private Double salaireBase;
+
 }
