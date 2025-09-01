@@ -13,11 +13,14 @@ public class RubriquePaie {
     private String id;
 
     @Indexed(unique = true)
-    private String code;           // ex: "SB", "CNAPS", "OSTIE", "IRSA", "HS", "PRIME", "AVANCE"
+    private String code;           // ex: "SB", "CNAPS", "OSTIE", "IRSA", "PRIME", "AVANCE"
 
-    private String nomRubrique;    // "Salaire de base", "CNAPS"...
-    private String typeRubrique;   // I / C / N (facultatif, pour l’imposable, etc.)
+    private String nomRubrique;    // "Salaire de base", "CNAPS", ...
     private Integer operation;     // 1 = +, 0 = -
-    private String idParametreGenereaux;   // null si manuel (PRIME, HS, AVANCE), valeur si calculé % du SB
+
+    private Boolean imposable;     // ⇐ NEW: true/false (SB=true, PRIME? selon config)
+    private String typeRubrique;   // (optionnel) I/C/N si tu veux garder ton code historique
+
+    private String idParametreGenereaux;   // null si manuel
     private String idSociete;
 }
