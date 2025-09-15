@@ -115,4 +115,52 @@ public class EmailService {
             throw new RuntimeException("Erreur lors de l'envoi de l'email de demande de congé : " + e.getMessage());
         }
     }
+
+    public void sendLeaveDecision(String toEmail,
+                                  String nomEntreprise,
+                                  String employeNomComplet,
+                                  String dateDebut,
+                                  String dateFin,
+                                  String dureeTexte,
+                                  String motif,
+                                  String commentaireRh,
+                                  Integer statut) {
+        if (toEmail == null || toEmail.isBlank()) return;
+
+        String decision = (statut != null && statut == 2) ? "VALIDÉ" : "REJETÉ";
+        String color = (statut != null && statut == 2) ? "#16a34a" : "#dc2626";
+
+        try {
+            MimeMessage msg = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("Décision de votre demande de congé - " + safe(nomEntreprise));
+
+            String html =
+                    "<div style='font-family:Arial,sans-serif;font-size:14px;color:#333;'>"
+                            + "  <h2 style='color:#2c3e50;margin:0 0 12px;'>Décision sur votre demande de congé</h2>"
+                            + "  <p>Bonjour <strong>" + safe(employeNomComplet) + "</strong>,</p>"
+                            + "  <p>Votre demande a été <strong style='color:" + color + "'>" + decision + "</strong>.</p>"
+                            + "  <table style='border-collapse:collapse;width:100%;max-width:640px;margin-top:6px'>"
+                            + "    <tr><td style='padding:8px;border:1px solid #eee;background:#fafafa;width:200px'>Entreprise</td>"
+                            + "        <td style='padding:8px;border:1px solid #eee;'>" + safe(nomEntreprise) + "</td></tr>"
+                            + "    <tr><td style='padding:8px;border:1px solid #eee;background:#fafafa'>Période</td>"
+                            + "        <td style='padding:8px;border:1px solid #eee;'>" + safe(dateDebut) + " → " + safe(dateFin) + "</td></tr>"
+                            + "    <tr><td style='padding:8px;border:1px solid #eee;background:#fafafa'>Durée</td>"
+                            + "        <td style='padding:8px;border:1px solid #eee;'>" + safe(dureeTexte) + "</td></tr>"
+                            + "    <tr><td style='padding:8px;border:1px solid #eee;background:#fafafa'>Motif</td>"
+                            + "        <td style='padding:8px;border:1px solid #eee;'>" + safe(motif) + "</td></tr>"
+                            + "    <tr><td style='padding:8px;border:1px solid #eee;background:#fafafa'>Commentaire RH</td>"
+                            + "        <td style='padding:8px;border:1px solid #eee;white-space:pre-wrap'>" + safe(commentaireRh) + "</td></tr>"
+                            + "  </table>"
+                            + "  <p style='color:#777;margin-top:12px'>Cet email est automatique.</p>"
+                            + "</div>";
+
+            helper.setText(html, true);
+            mailSender.send(msg);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Erreur envoi mail décision congé : " + e.getMessage());
+        }
+    }
 }

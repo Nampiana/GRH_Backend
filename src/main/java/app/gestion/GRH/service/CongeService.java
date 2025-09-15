@@ -52,7 +52,7 @@ public class CongeService {
         congeRepository.deleteById(id);
     }
 
-    public Optional<Conge> update(String id, Conge newConge) {
+ /*   public Optional<Conge> update(String id, Conge newConge) {
         return congeRepository.findById(id).map(c -> {
             c.setIdEmployerSociete(newConge.getIdEmployerSociete());
             c.setDateDebut(newConge.getDateDebut());
@@ -63,6 +63,36 @@ public class CongeService {
             c.setCommentaire(newConge.getCommentaire());
             c.setDateCreation(newConge.getDateCreation());
             return congeRepository.save(c);
+        });
+    }*/
+
+    public Optional<Conge> update(String id, Conge newConge) {
+        return congeRepository.findById(id).map(old -> {
+            Integer oldStatut = old.getStatut();
+
+            old.setIdEmployerSociete(newConge.getIdEmployerSociete());
+            old.setDateDebut(newConge.getDateDebut());
+            old.setDateFin(newConge.getDateFin());
+            old.setMotif(newConge.getMotif());
+            old.setStatut(newConge.getStatut());
+            old.setDuree(newConge.getDuree());
+            old.setCommentaire(newConge.getCommentaire());
+            old.setDateCreation(newConge.getDateCreation());
+
+            Conge saved = congeRepository.save(old);
+
+            // ✅ si le statut passe de 1 (ou autre) vers 2/3 → email au salarié
+            try {
+                if (saved.getStatut() != null
+                        && (saved.getStatut() == 2 || saved.getStatut() == 3)
+                        && !Objects.equals(oldStatut, saved.getStatut())) {
+                    notifyEmployeeOnDecision(saved);
+                }
+            } catch (Exception e) {
+                e.printStackTrace(); // on ne casse pas la MAJ si l’email échoue
+            }
+
+            return saved;
         });
     }
 
@@ -152,6 +182,71 @@ public class CongeService {
                 dureeTxt,
                 motif,
                 commentaire
+        );
+    }
+
+    private void notifyEmployeeOnDecision(Conge conge) {
+        if (conge == null || conge.getIdEmployerSociete() == null) return;
+
+        // 1) Récupérer le lien employeur-société
+        Optional<EmployerSociete> empOpt = employerSocieteRepository.findById(conge.getIdEmployerSociete());
+        if (empOpt.isEmpty()) return;
+
+        EmployerSociete emp = empOpt.get();
+        String idSociete = emp.getIdSociete();
+        String idIndividuEmploye = emp.getIdIndividue();
+
+        // 2) Récupérer l'individu (salarié) pour email + nom complet
+        String employeEmail = null;
+        String employeNomComplet = "Employé";
+        if (idIndividuEmploye != null) {
+            Optional<Individu> indOpt = individuRepository.findById(idIndividuEmploye);
+            if (indOpt.isPresent()) {
+                Individu ind = indOpt.get();
+
+                String nom = (ind.getNom() == null ? "" : ind.getNom());
+                String prenom = (ind.getPrenom() == null ? "" : ind.getPrenom());
+                String full = (prenom + " " + nom).trim();
+                if (!full.isEmpty()) {
+                    employeNomComplet = full;
+                }
+
+                employeEmail = ind.getEmail();
+            }
+        }
+        if (employeEmail == null || employeEmail.isBlank()) return;
+
+        // 3) Nom de la société (fallback si le modèle diffère)
+        String nomSociete = "Votre société";
+        try {
+            nomSociete = societeService.findById(idSociete).map(s -> {
+                try {
+                    return (String) s.getClass().getMethod("getNomSociete").invoke(s);
+                } catch (Exception e) {
+                    return "Votre société";
+                }
+            }).orElse("Votre société");
+        } catch (Exception ignored) {}
+
+        // 4) Formatage des champs (dates / durée)
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        String dDeb = (conge.getDateDebut() != null) ? df.format(conge.getDateDebut()) : "—";
+        String dFin = (conge.getDateFin() != null) ? df.format(conge.getDateFin()) : "—";
+        String dureeTxt = (conge.getDuree() != null) ? (conge.getDuree() + " jour(s)") : "—";
+        String motif = conge.getMotif();
+        String commentaireRh = conge.getCommentaire();
+
+        // 5) Envoi
+        emailService.sendLeaveDecision(
+                employeEmail,
+                nomSociete,
+                employeNomComplet,
+                dDeb,
+                dFin,
+                dureeTxt,
+                motif,
+                commentaireRh,
+                conge.getStatut()
         );
     }
 }
