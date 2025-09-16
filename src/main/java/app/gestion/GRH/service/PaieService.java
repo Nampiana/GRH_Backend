@@ -27,8 +27,17 @@ public class PaieService {
         EmployerSociete emp = employerRepo.findById(idEmployer)
                 .orElseThrow(() -> new RuntimeException("Employer introuvable"));
 
+        // ❌  Bloquer le calcul si l’employé est déjà débouché (peu importe la date)
+        if (emp.getDateDebauche() != null) {
+            throw new IllegalStateException("Paie non calculable : l’employé est déjà débouché.");
+        }
+
         MoisPaie mois = moisPaieRepo.findById(moisPaieId)
                 .orElseThrow(() -> new RuntimeException("MoisPaie introuvable"));
+
+        // ✅ Salaire de base depuis EmployerSociete
+        double salaireBase = Optional.ofNullable(emp.getSalaireBase())
+                .orElseThrow(() -> new RuntimeException("Salaire de base non défini sur l'employé"));
 
         // Rubriques applicables à la catégorie de l'employé
         List<RubriqueCategorie> rubCats = rubriqueCatRepo.findByIdCategorie(emp.getIdCategorie());
@@ -37,24 +46,20 @@ public class PaieService {
                         .orElseThrow(() -> new RuntimeException("Rubrique introuvable: " + rc.getIdRubriquePaie())))
                 .collect(Collectors.toMap(RubriquePaie::getId, r -> r));
 
-        // Saisies du mois
+        // Saisies du mois (hors SB désormais)
         List<PaieMois> saisies = paieMoisRepo.findByIdEmployerAndMoisPaieId(idEmployer, moisPaieId);
 
-        // ---------- Trouver la rubrique SB et sa ligne ----------
+        // ---------- Trouver la rubrique SB (affichage + cohérence) ----------
         RubriquePaie sbRub = rubriqueRepo.findByCode("SB")
                 .orElseThrow(() -> new RuntimeException("Rubrique 'SB' non configurée"));
         String sbRubId = sbRub.getId();
+
+        // Id RubriqueCategorie lié à SB pour cette catégorie (utile si tu gardes la table de mapping)
         String sbRubCatId = rubCats.stream()
                 .filter(rc -> rc.getIdRubriquePaie().equals(sbRubId))
                 .map(RubriqueCategorie::getId)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("La rubrique SB n'est pas liée à la catégorie de l'employé"));
-
-        double salaireBase = saisies.stream()
-                .filter(p -> p.getIdRubriqueCat().equals(sbRubCatId))
-                .map(PaieMois::getValeur)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Salaire de base (SB) non saisi pour ce mois"));
+                .orElse(null); // peut être null si tu ne relies pas SB aux catégories
 
         List<LignePaieDTO> lignes = new ArrayList<>();
 
@@ -64,14 +69,17 @@ public class PaieService {
         double cotisations = 0.0;       // tous les -
         double irsaAmount = 0.0;
 
-        // ---------- 1) SB ----------
+        // ---------- 1) SB (depuis EmployerSociete.salaireBase) ----------
         lignes.add(new LignePaieDTO("SB", sbRub.getNomRubrique(), 1, ar(salaireBase), null));
-        // SB est imposable par convention (typeRubrique='I' conseillé)
+        // SB est imposable par convention
         plusImposable += salaireBase;
 
-        // ---------- 2) Lignes manuelles (sans param généraux) ----------
+        // ---------- 2) Lignes manuelles (sans param généraux), en ignorant toute saisie "SB" ----------
         for (PaieMois p : saisies) {
-            if (p.getIdRubriqueCat().equals(sbRubCatId)) continue; // déjà fait
+            if (sbRubCatId != null && p.getIdRubriqueCat().equals(sbRubCatId)) {
+                // On ignore toute tentative de saisir SB manuellement
+                continue;
+            }
 
             RubriqueCategorie rc = rubCats.stream()
                     .filter(r -> r.getId().equals(p.getIdRubriqueCat()))
@@ -86,7 +94,6 @@ public class PaieService {
 
             lignes.add(new LignePaieDTO(r.getCode(), r.getNomRubrique(), r.getOperation(), ar(p.getValeur()), null));
 
-            // classement I/N/+ ou −
             if (r.getOperation() != null && r.getOperation() == 1) {
                 if ("I".equalsIgnoreCase(r.getTypeRubrique())) {
                     plusImposable += p.getValeur();
@@ -99,7 +106,6 @@ public class PaieService {
         }
 
         // ---------- 3) Rubriques paramétrées ----------
-        // calcul après pour connaître le Brut imposable (SB + +I manuels)
         double brutImposable = ar(plusImposable);
 
         for (RubriquePaie r : rubriquesById.values()) {
@@ -111,9 +117,9 @@ public class PaieService {
             Double taux = param.getPourcentage();
             if (taux == null) continue;
 
-            // ✅ Base de calcul:
+            // Base de calcul :
             // - IRSA: % du BRUT IMPOSABLE
-            // - autres (CNAPS, OSTIE…): % du SB
+            // - autres (CNAPS, OSTIE…): % du SB (EmployerSociete.salaireBase)
             double base = "IRSA".equalsIgnoreCase(r.getCode()) ? brutImposable : salaireBase;
             double montant = ar(base * (taux / 100.0));
 
@@ -128,7 +134,6 @@ public class PaieService {
             }
         }
 
-        // au cas où des + paramétrés imposables ont été ajoutés
         brutImposable = ar(plusImposable);
 
         // ---------- 4) Totaux finaux ----------
@@ -153,7 +158,7 @@ public class PaieService {
                 .build();
     }
 
-    // --- inchangé ---
+    // --- inchangé pour l’instant ---
     public void enregistrerCalcul(String idEmployer, String moisPaieId, List<LignePaieDTO> lignes, String idCategorie) {
         paieMoisRepo.deleteByIdEmployerAndMoisPaieId(idEmployer, moisPaieId);
 
@@ -166,6 +171,10 @@ public class PaieService {
         for (LignePaieDTO l : lignes) {
             RubriquePaie r = byCode.get(l.getCode());
             if (r == null) continue;
+
+            // ❌ Ne jamais enregistrer SB depuis le front (source = EmployerSociete)
+            if ("SB".equalsIgnoreCase(r.getCode())) continue;
+
             String rubCatId = rubIdToRubCatId.get(r.getId());
             if (rubCatId == null) continue;
 
@@ -180,3 +189,4 @@ public class PaieService {
         }
     }
 }
+

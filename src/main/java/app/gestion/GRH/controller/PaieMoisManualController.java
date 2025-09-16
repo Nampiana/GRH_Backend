@@ -39,6 +39,10 @@ public class PaieMoisManualController {
         for (LigneManuelle l : req.getLignes()) {
             RubriquePaie r = byCode.get(l.getCode().toUpperCase(Locale.ROOT));
             if (r == null) continue;
+
+            // ❌ Bloquer toute écriture de SB : c'est le salaire du contrat
+            if ("SB".equalsIgnoreCase(r.getCode())) continue;
+
             String rubCatId = rubIdToRubCatId.get(r.getId());
             if (rubCatId == null) continue;
 
