@@ -35,7 +35,10 @@ public class CongeService {
         Conge saved = congeRepository.save(conge);
 
         try {
-            notifyRhOnNewLeave(saved);
+            System.out.printf("Nouveau congé créé avec ID, employé, date début et date fin%n");
+
+            // notifyRhOnNewLeave(saved);
+
         } catch (Exception e) {
             // on log seulement, on ne casse pas la création si email échoue
             e.printStackTrace();
@@ -83,11 +86,13 @@ public class CongeService {
 
             // ✅ si le statut passe de 1 (ou autre) vers 2/3 → email au salarié
             try {
-                if (saved.getStatut() != null
+              /*  if (saved.getStatut() != null
                         && (saved.getStatut() == 2 || saved.getStatut() == 3)
                         && !Objects.equals(oldStatut, saved.getStatut())) {
                     notifyEmployeeOnDecision(saved);
-                }
+                }*/
+                System.out.printf("Nouveau congé créé avec ID, employé, date début et date fin%n");
+
             } catch (Exception e) {
                 e.printStackTrace(); // on ne casse pas la MAJ si l’email échoue
             }
