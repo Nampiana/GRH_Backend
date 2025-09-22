@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT = stateless
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**",  "/api/societe/logo/**",  "/uploads/**", "/api/sanction/stream/**").permitAll() // Auth endpoints accessibles sans token
+                        .requestMatchers("/api/auth/**",  "/api/societe/logo/**",  "/uploads/**", "/api/sanction/stream/**", "/api/individu/**", "/api/utilisateur/**").permitAll() // Auth endpoints accessibles sans token
                         .anyRequest().authenticated() // Toutes les autres requêtes nécessitent un token
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Ajout du filtre
