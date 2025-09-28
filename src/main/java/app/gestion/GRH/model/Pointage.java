@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
+
 @Document(collection = "pointage")
 @Data
 @NoArgsConstructor
@@ -17,6 +19,6 @@ public class Pointage {
     private String id;
 
     private String idEmployerSociete;
-    private String dateArriver;
-    private String dateDepart;
+    private Date dateArriver;
+    private Date dateDepart;
 }

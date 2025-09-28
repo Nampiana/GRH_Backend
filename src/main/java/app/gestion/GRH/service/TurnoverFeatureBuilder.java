@@ -25,7 +25,7 @@ public class TurnoverFeatureBuilder {
         return null;
     }
 
-    public TurnoverFeatureDto build(String idEmployerSociete, Date ref){
+ /*   public TurnoverFeatureDto build(String idEmployerSociete, Date ref){
         TurnoverFeatureDto f = new TurnoverFeatureDto();
         f.setIdEmployerSociete(idEmployerSociete);
 
@@ -84,5 +84,5 @@ public class TurnoverFeatureBuilder {
         f.setJours_conge_90(j);
 
         return f;
-    }
+    }*/
 }

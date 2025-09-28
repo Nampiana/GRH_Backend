@@ -14,7 +14,7 @@ import java.util.List;
 public class TurnoverController {
     private final TurnoverService svc;
 
-    @PostMapping("/refresh/{idSociete}")
+   /* @PostMapping("/refresh/{idSociete}")
     public List<TurnoverRisk> refresh(@PathVariable String idSociete){
         return svc.refresh(idSociete);
     }
@@ -22,5 +22,5 @@ public class TurnoverController {
     @GetMapping("/top/{idSociete}")
     public List<TurnoverRisk> top(@PathVariable String idSociete, @RequestParam(defaultValue="10") int n){
         return svc.top(idSociete, n);
-    }
+    }*/
 }

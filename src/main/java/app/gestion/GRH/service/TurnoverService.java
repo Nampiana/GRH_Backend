@@ -18,7 +18,7 @@ public class TurnoverService {
     private final TurnoverMlClient mlClient;
     private final TurnoverRiskRepository riskRepo;
 
-    public List<TurnoverRisk> refresh(String idSociete){
+   /* public List<TurnoverRisk> refresh(String idSociete){
         Date now = new Date();
         var emps = empRepo.findByIdSociete(idSociete);
         var feats = emps.stream().map(e -> featBuilder.build(e.getId(), now)).toList();
@@ -41,5 +41,5 @@ public class TurnoverService {
         var ids = empRepo.findByIdSociete(idSociete).stream().map(EmployerSociete::getId).toList();
         var list = riskRepo.findByIdEmployerSocieteInOrderByRiskScoreDesc(ids);
         return list.size()>n ? list.subList(0,n) : list;
-    }
+    }*/
 }
